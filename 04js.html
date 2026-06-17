@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>萌寵與經典計算機綜合工作坊</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* ==========================================
+           全域基本重設 & 網格背景（網頁一風格）
+           ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #fdf6ec;
+            background-image: radial-gradient(#fbc4b4 12%, transparent 12%);
+            background-size: 30px 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-family: "Microsoft JhengHei", 'Segoe UI', sans-serif;
+            padding: 40px 20px;
+        }
+
+        h1.main-title {
+            color: #c84d31;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 0px #fff;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        /* 主工作區：三欄並排響應式 */
+        .workspace {
+            display: flex;
+            gap: 30px;
+            max-width: 1400px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* ==========================================
+           樣式一：和風精緻卡片（網頁一基礎）
+           ========================================== */
+        .cute-card {
+            background: rgba(255, 255, 255, 0.95);
+            border: 4px solid #fbb997;
+            border-radius: 24px;
+            box-shadow: 0 10px 25px rgba(251, 150, 110, 0.15);
+            padding: 25px;
+            flex: 1;
+            min-width: 320px;
+            max-width: 420px;
+            position: relative;
+        }
+
+        .cute-card::before {
+            content: "🐾";
+            position: absolute;
+            bottom: 10px;
+            right: 15px;
+            font-size: 50px;
+            color: rgba(251, 150, 110, 0.08);
+            pointer-events: none;
+        }
+
+        .panel-header {
+            text-align: center;
+            margin-bottom: 20px;
+            background: #fff5f2;
+            padding: 12px;
+            border-radius: 15px;
+            border: 2px dashed #f4a7b9;
+        }
+
+        .panel-header h2 {
+            color: #c84d31;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .panel-header p {
+            font-size: 12px;
+            color: #8c7e77;
+        }
+
+        /* 輸入框與通用組件 */
+        .input-field {
+            width: 100%;
+            height: 42px;
+            border: 2px solid #ffd6ca;
+            border-radius: 15px;
+            padding: 0 15px;
+            font-size: 16px;
+            outline: none;
+            background: #fffdfc;
+            text-align: center;
+            color: #4a221b;
+            margin-bottom: 12px;
+            transition: 0.2s;
+        }
+
+        .input-field:focus {
+            border-color: #fb966e;
+            background: #ffffff;
+        }
+
+        select.input-field {
+            text-align-last: center;
+            font-weight: bold;
+        }
+
+        .action-btn {
+            width: 100%;
+            height: 45px;
+            background: linear-gradient(135deg, #fbc4b4, #fb966e);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(251, 150, 110, 0.2);
+            transition: 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.05);
+        }
+
+        .output-container {
+            margin-top: 15px;
+            background: #fffaf7;
+            border: 2px solid #ffd6ca;
+            border-radius: 15px;
+            height: 55px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #c84d31;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        /* 實體計算機鍵盤佈局 */
+        .calc-screen {
+            width: 100%;
+            height: 65px;
+            background: #faf6f0;
+            border: 3px solid #ffd6ca;
+            border-radius: 15px;
+            padding: 10px 15px;
+            text-align: right;
+            margin-bottom: 15px;
+        }
+
+        .calc-screen .current {
+            font-size: 26px;
+            font-weight: bold;
+            color: #4a221b;
+            line-height: 45px;
+        }
+
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .calc-btn {
+            height: 46px;
+            border: 2px solid #ffebe5;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background: #ffffff;
+            color: #5c3a31;
+            transition: all 0.1s;
+        }
+
+        .calc-btn:hover {
+            background: #fff5f2;
+            border-color: #fbc4b4;
+        }
+
+        .calc-btn.op { background: #fffcf0; color: #d05a3f; }
+        .calc-btn.clear { background: #fff0f0; color: #d9534f; }
+        .calc-btn.equal { background: #1a73e8; color: white; border-color: #1a73e8; }
+        .calc-btn.equal:hover { background: #155cb4; }
+
+
+        /* ==========================================
+           樣式二：經典復古藍粉對比（網頁二風格）
+           ========================================== */
+        .box-v2-input {
+            background-color: lightblue;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .box-v2-output {
+            background-color: lightpink;
+            border-radius: 20px;
+            text-align: center;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 55px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .box-v2-input input, .box-v2-input select {
+            width: 90%;
+            height: 36px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .box-v2-input button {
+            width: 60%;
+            height: 36px;
+            border-radius: 20px;
+            border: 1px solid #aaa;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .box-v2-input button:hover {
+            background-color: #e0e0e0;
+        }
+
+
+        /* ==========================================
+           樣式三：現代高級漸層商務感（網頁三風格）
+           ========================================== */
+        .box-v3-inner {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding: 10px 5px;
+        }
+
+        .box-v3-input {
+            width: 100%;
+            height: 46px;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1rem;
+            color: #334155;
+            background-color: #f8fafc;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .box-v3-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        }
+
+        .btn-v3 {
+            width: 100%;
+            height: 46px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2);
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .btn-v3:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            box-shadow: 0 6px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-v3:active {
+            transform: scale(0.98);
+        }
+
+        .output-v3 {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            height: 65px;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 20px rgba(118, 75, 162, 0.2);
+            margin-top: 15px;
+        }
+
+        /* 手機版自動適應橫向排列 */
+        @media (max-width: 1100px) {
+            .workspace {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cute-card {
+                max-width: 500px;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 class="main-title">🌸 和風萌寵與多功能計算機工作坊 🐾</h1>
+
+    <div class="workspace">
+
+        <div class="cute-card">
+            <div class="panel-header">
+                <h2>🐶 柴犬波波 表單工作坊 (網頁一)</h2>
+                <p>標準的兩數自訂四則運算</p>
+            </div>
+            <div>
+                <input type="text" class="input-field" id="num1" value="200" placeholder="第一個數字 (num1?)">
+                <input type="text" class="input-field" id="num2" value="100" placeholder="第二個數字 (num2?)">
+                <select class="input-field" id="opt">
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">*</option>
+                    <option value="/">/</option>
+                </select>
+                <button type="button" class="action-btn" id="myBtn">送出資料 (Submit)</button>
+            </div>
+            <div class="output-container">
+                <span id="mySpan">1 + 1 = 2</span>
+            </div>
+        </div>
+
+        <div class="cute-card">
+            <div class="panel-header">
+                <h2>🐱 三花貓貓 實體面板計算機</h2>
+                <p>與對照圖一模一樣的 3、6、9、AC 經典佈局</p>
+            </div>
+            <div class="calc-screen">
+                <div class="current" id="calcCurrent">0</div>
+            </div>
+            <div class="calc-grid">
+                <button class="calc-btn op" data-val="(">(</button>
+                <button class="calc-btn op" data-val=")">)</button>
+                <button class="calc-btn op" data-val="%">%</button>
+                <button class="calc-btn clear" id="calcClear">AC</button>
+
+                <button class="calc-btn num" data-val="7">7</button>
+                <button class="calc-btn num" data-val="8">8</button>
+                <button class="calc-btn num" data-val="9">9</button>
+                <button class="calc-btn op" data-val="/">÷</button>
+
+                <button class="calc-btn num" data-val="4">4</button>
+                <button class="calc-btn num" data-val="5">5</button>
+                <button class="calc-btn num" data-val="6">6</button>
+                <button class="calc-btn op" data-val="*">×</button>
+
+                <button class="calc-btn num" data-val="1">1</button>
+                <button class="calc-btn num" data-val="2">2</button>
+                <button class="calc-btn num" data-val="3">3</button>
+                <button class="calc-btn op" data-val="-">-</button>
+
+                <button class="calc-btn num" data-val="0">0</button>
+                <button class="calc-btn num" data-val=".">.</button>
+                <button class="calc-btn equal" id="calcEqual">=</button>
+                <button class="calc-btn op" data-val="+">+</button>
+            </div>
+        </div>
+
+        <div class="cute-card">
+            <div class="panel-header">
+                <h2>📊 經典復古工作坊 (網頁二)</h2>
+                <p>保留原創藍粉 Flexbox 對比區塊風格</p>
+            </div>
+            <div class="box-v2-input">
+                <input type="text" name="num1_v2" id="num1_v2" value="200" placeholder="num1?">
+                <input type="text" name="num2_v2" id="num2_v2" value="100" placeholder="num2?">
+                <select name="opt_v2" id="opt_v2">
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">*</option>
+                    <option value="/">/</option>
+                </select>
+                <button type="button" id="myBtn_v2">submit</button>
+            </div>
+            <div class="box-v2-output">
+                <span id="mySpan_v2">1 + 1 = 2</span>
+            </div>
+        </div>
+
+        <div class="cute-card">
+            <div class="panel-header">
+                <h2>✨ 現代感智慧監聽工作坊 (網頁三)</h2>
+                <p>免點擊！即時監聽輸入並呈現高級漸層結果</p>
+            </div>
+            <div class="box-v3-inner">
+                <input type="text" class="box-v3-input" name="num1_v3" id="num1_v3" value="" placeholder="請填寫數字">
+                <input type="text" class="box-v3-input" name="num2_v3" id="num2_v3" value="" placeholder="請填寫數字">
+                <select class="box-v3-input" name="opt_v3" id="opt_v3">
+                    <option value="+">+</option>
+                    <option value="-">-</option>
+                    <option value="*">*</option>
+                    <option value="/">/</option>
+                </select>
+                <button type="button" class="btn-v3" id="myBtn_v3">智慧即時計算中</button>
+            </div>
+            <div class="output-v3">
+                <span id="mySpan_v3">結果顯示</span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <script>
+        $(document).ready(function () {
+
+            // ==========================================
+            // 邏輯一：左邊柴犬表單運算（網頁一）
+            // ==========================================
+            const myBtn = $('#myBtn');
+            const num1 = $('#num1');
+            const num2 = $('#num2');
+            const opt = $('#opt');
+            const mySpan = $('#mySpan');
+
+            myBtn.click(function (e) {
+                let getNum1 = Number(num1.val());
+                let getNum2 = Number(num2.val());
+                let getOpt = opt.val();
+                let result = 0;
+
+                switch (getOpt) {
+                    case "+": result = getNum1 + getNum2; break;
+                    case "-": result = getNum1 - getNum2; break;
+                    case "*": result = getNum1 * getNum2; break;
+                    case "/": result = getNum1 / getNum2; break;
+                }
+
+                let tmpText = `${getNum1} ${getOpt} ${getNum2} = ${result}`;
+                mySpan.text(tmpText);
+            });
+
+            // ==========================================
+            // 邏輯二：右邊貓貓標準面板實體計算機（網頁一）
+            // ==========================================
+            let currentInput = "0";
+
+            function updateScreen() {
+                $('#calcCurrent').text(currentInput);
+            }
+
+            $('.calc-btn.num, .calc-btn.op').click(function () {
+                let val = $(this).attr('data-val');
+
+                if (currentInput === "0" && !isNaN(val)) {
+                    currentInput = val; 
+                } else {
+                    currentInput += val; 
+                }
+                updateScreen();
+            });
+
+            $('#calcClear').click(function () {
+                currentInput = "0";
+                updateScreen();
+            });
+
+            $('#calcEqual').click(function () {
+                try {
+                    let evalResult = eval(currentInput);
+                    currentInput = Number(evalResult.toFixed(6)).toString();
+                } catch (e) {
+                    currentInput = "Error"; 
+                }
+                updateScreen();
+            });
+
+
+            // ==========================================
+            // 邏輯三：網頁二的計算邏輯 (變數後綴 _v2)
+            // ==========================================
+            const myBtn_v2 = $('#myBtn_v2');
+            const num1_v2 = $('#num1_v2');
+            const num2_v2 = $('#num2_v2');
+            const opt_v2 = $('#opt_v2');
+            const mySpan_v2 = $('#mySpan_v2');
+
+            myBtn_v2.click(function (e) {
+                let getNum1 = Number(num1_v2.val());
+                let getNum2 = Number(num2_v2.val());
+                let getOpt = opt_v2.val();
+                let result = 0;
+
+                switch (getOpt) {
+                    case "+": result = getNum1 + getNum2; break;
+                    case "-": result = getNum1 - getNum2; break;
+                    case "*": result = getNum1 * getNum2; break;
+                    case "/": result = getNum1 / getNum2; break;
+                }
+                let tmpText = `${getNum1} ${getOpt} ${getNum2} = ${result}`;
+                mySpan_v2.text(tmpText);
+            });
+
+
+            // ==========================================
+            // 邏輯四：網頁三的即時監聽邏輯 (變數後綴 _v3)
+            // ==========================================
+            $('#num1_v3, #num2_v3, #opt_v3').on('input change', function() {
+                const num1_v3 = $('#num1_v3');
+                const num2_v3 = $('#num2_v3');
+                const opt_v3 = $('#opt_v3');
+                const mySpan_v3 = $('#mySpan_v3');
+
+                let getNum1 = Number(num1_v3.val());
+                let getNum2 = Number(num2_v3.val());
+                let getOpt = opt_v3.val();
+                let result = 0;
+
+                switch (getOpt) {
+                    case "+": result = getNum1 + getNum2; break;
+                    case "-": result = getNum1 - getNum2; break;
+                    case "*": result = getNum1 * getNum2; break;
+                    case "/": result = getNum1 / getNum2; break;
+                }
+
+                let tmpText = `${getNum1} ${getOpt} ${getNum2} = ${result}`;
+                mySpan_v3.text(tmpText);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

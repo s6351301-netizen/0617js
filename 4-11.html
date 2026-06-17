@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <title>喫茶レトロ - 全能理財控制中心</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .main-wrapper {
+            display: flex;
+            width: 850px;
+            max-width: 100%;
+            gap: 12px;
+        }
+
+        .box {
+            background: white;
+            border-radius: 14px;
+            padding: 15px;
+            flex: 1;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .input-container {
+            background-color: #e0f2fe;
+            border: 1.5px solid #bae6fd;
+        }
+
+        .output-container {
+            background-color: #fce7f3;
+            border: 1.5px solid #fbcfe8;
+        }
+
+        /* 頁籤樣式 */
+        .tab-menu {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            background: #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .tab-btn.active {
+            background: #1e3a8a;
+            color: white;
+        }
+
+        .content-panel {
+            display: none;
+        }
+
+        .content-panel.active {
+            display: block;
+        }
+
+        .section-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #1e3a8a;
+            margin: 10px 0 5px;
+            border-bottom: 1.5px solid #93c5fd;
+        }
+
+        .form-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            gap: 5px;
+        }
+
+        input[type="number"],
+        input[type="text"] {
+            width: 45%;
+            height: 26px;
+            border-radius: 6px;
+            text-align: right;
+            border: 1px solid #cbd5e1;
+            padding: 0 5px;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .btn-blue {
+            background-color: #2563eb;
+        }
+
+        .btn-green {
+            background-color: #10b981;
+        }
+
+        #keyboard {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .key {
+            padding: 10px;
+            text-align: center;
+            background: #fff;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="main-wrapper">
+        <div class="box input-container">
+            <div class="tab-menu">
+                <button class="tab-btn active" onclick="showTab('budget', this)">預算控制</button>
+                <button class="tab-btn" onclick="showTab('finance', this)">理財計算</button>
+            </div>
+
+            <div id="budget" class="content-panel active">
+                <h4 style="color: #1e3a8a;">📊 月花費控制</h4>
+                <div class="section-title">💵 薪資與支出</div>
+                <div class="form-row"><label>薪資收入</label><input type="number" id="salary" value="50000"
+                        onfocus="setActive(this)"></div>
+                <div class="form-row"><label>利息收入</label><input type="number" id="salary2" value="10000"
+                        onfocus="setActive(this)"></div>        
+                <div id="fixedContainer">
+                    <div class="form-row"><label>固定開銷-房租</label><input type="number" class="fixed-input" value="15000"
+                            onfocus="setActive(this)"></div>
+                    <div class="form-row"><label>固定開銷-水電</label><input type="number" class="fixed-input" value="300"
+                            onfocus="setActive2(this)"></div>        
+                </div>
+                <button class="btn-main btn-blue" id="myBtn">開始計算</button>
+            </div>
+
+            <div id="finance" class="content-panel">
+                <h4 style="color: #1e3a8a;">📈 理財複利試算</h4>
+                <input type="number" id="c_principal" placeholder="本金" onfocus="setActive(this)">
+                <input type="number" id="c_rate" placeholder="年利率 (%)" onfocus="setActive(this)">
+                <input type="number" id="c_years" placeholder="年期" onfocus="setActive(this)">
+                <button class="btn-main btn-blue" onclick="calcFinance()">計算本利和</button>
+            </div>
+        </div>
+
+        <div class="box output-container">
+            <h4 style="color: #9d174d; text-align: center;">📋 即時明細與鍵盤</h4>
+            <div id="res_display" style="padding:10px; font-weight:bold;">計算結果會顯示於此...</div>
+
+            <div id="keyboard">
+                <script>
+                    for (let i = 1; i <= 9; i++) document.write(`<div class="key" onclick="addNum('${i}')">${i}</div>`);
+                    document.write(`<div class="key" onclick="addNum('.')">.</div><div class="key" onclick="addNum('0')">0</div><div class="key" onclick="clearInput()">AC</div>`);
+                </script>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        let activeInput = null;
+        function setActive(el) { activeInput = el; }
+        function addNum(n) { if (activeInput) activeInput.value += n; }
+        function clearInput() { if (activeInput) activeInput.value = ''; }
+
+        function showTab(id, btn) {
+            $('.content-panel').removeClass('active');
+            $('.tab-btn').removeClass('active');
+            $('#' + id).addClass('active');
+            $(btn).addClass('active');
+        }
+
+        // 預算邏輯
+        $('#myBtn').click(function () {
+            let sal = Number($('#salary').val());
+            let fix = 0; $('.fixed-input').each(function () { fix += Number($(this).val()); });
+            $('#res_display').text(`總薪資: ${sal} 利息: ${sal2} 
+            固定支出: ${fix} 
+            餘額: ${sal+sal2- fix}`);
+        });
+
+        // 複利邏輯
+        function calcFinance() {
+            let p = Number($('#c_principal').val());
+            let r = Number($('#c_rate').val()) / 100;
+            let t = Number($('#c_years').val());
+            let res = Math.round(p * Math.pow((1 + r), t));
+            $('#res_display').text(`本利和總計：${res} 元`);
+        }
+    </script>
+
+</body>
+
+</html>

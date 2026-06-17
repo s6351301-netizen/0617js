@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日系喫茶店 - 三合一智慧理財計算機</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* ==========================================
+           全域基本重設 & 輕復古喫茶店背景
+           ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: #f4f0ea; /* 溫潤燕麥奶色 */
+            background-image: 
+                radial-gradient(#e6ded4 1px, transparent 1px), 
+                radial-gradient(#e6ded4 1px, #f4f0ea 1px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "PingFang TC", "Helvetica Neue", "Microsoft JhengHei", sans-serif;
+            padding: 30px 20px;
+            color: #4a3e3d;
+        }
+
+        h1.main-title {
+            color: #2b4c3f; /* 沉穩抹茶綠 */
+            margin-bottom: 35px;
+            font-size: 26px;
+            letter-spacing: 2px;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        h1.main-title::after {
+            content: "";
+            display: block;
+            width: 50px;
+            height: 3px;
+            background-color: #c08457; /* 焦糖色 */
+            margin: 8px auto 0;
+            border-radius: 2px;
+        }
+
+        /* 主工作區佈局 */
+        .workspace {
+            display: flex;
+            gap: 35px;
+            max-width: 1050px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* 喫茶店風格卡片基礎樣式 */
+        .cafe-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(74, 62, 61, 0.06), 0 2px 6px rgba(74, 62, 61, 0.04);
+            padding: 30px;
+            flex: 1;
+            min-width: 360px;
+            max-width: 480px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .cafe-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .cafe-card::after {
+            content: "Café Finance";
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #c6b9ad;
+        }
+
+        /* ==========================================
+           分頁標籤切換鈕 (Tabs)
+           ========================================== */
+        .cafe-tabs {
+            display: flex;
+            background: #faf8f5;
+            border: 1px solid #dcd3c9;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 4px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            padding: 10px 5px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #8a7a75;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .tab-btn.active {
+            background: #2b4c3f;
+            color: #ffffff;
+            box-shadow: 0 2px 6px rgba(43, 76, 63, 0.15);
+        }
+
+        /* 功能表單容器區隔（預設隱藏） */
+        .form-panel {
+            display: none;
+        }
+        .form-panel.active {
+            display: block;
+        }
+
+        /* 表單標籤文字 */
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2b4c3f;
+            margin-bottom: 4px;
+            padding-left: 4px;
+        }
+
+        /* 輸入框與下拉選單樣式 */
+        .input-field {
+            width: 100%;
+            height: 45px;
+            border: 1px solid #dcd3c9;
+            border-radius: 8px;
+            padding: 0 15px;
+            font-size: 15px;
+            outline: none;
+            background: #faf8f5;
+            text-align: center;
+            color: #4a3e3d;
+            transition: all 0.25s ease;
+        }
+
+        .input-field:focus {
+            border-color: #2b4c3f;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(43, 76, 63, 0.08);
+        }
+
+        select.input-field {
+            text-align-last: center;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* 輸出區塊：深綠色優雅黑板感 */
+        .output-container-cafe {
+            margin-top: 20px;
+            background: #2b4c3f;
+            color: #f4f0ea;
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            padding: 18px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+            min-height: 90px;
+        }
+
+        .output-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 5px;
+            border-bottom: 1px dashed rgba(244, 240, 234, 0.15);
+            padding-bottom: 5px;
+        }
+        .output-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .output-container-cafe div span.result-val {
+            color: #f7ca75; /* 亮眼琥珀金顯示數據 */
+            font-weight: 600;
+            font-size: 1.25rem;
+        }
+
+        /* --- 右面板：數字快捷鍵盤界面 --- */
+        .calc-screen-hint {
+            width: 100%;
+            background: #faf8f5;
+            border: 1px solid #dcd3c9;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            color: #8a7a75;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .calc-screen-hint span {
+            color: #c08457;
+            font-weight: 600;
+        }
+
+        /* 計算機按鍵網格 */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        /* 打字機圓潤鍵帽外觀 */
+        .calc-btn {
+            height: 54px;
+            border: 1px solid #e6ded4;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            background: #ffffff;
+            color: #4a3e3d;
+            box-shadow: 0 4px 0 #e6ded4, 0 5px 10px rgba(0,0,0,0.05);
+            transition: all 0.1s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calc-btn:hover {
+            background: #faf8f5;
+            border-color: #c08457;
+            color: #c08457;
+        }
+
+        .calc-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 #e6ded4, 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .calc-btn.backspace {
+            background: #fffdf7;
+            color: #c08457;
+            border-color: #f3e9dc;
+            border-radius: 20px;
+        }
+
+        .calc-btn.clear {
+            background: #fdf2f2;
+            color: #c56b6b;
+            border-color: #f7dddd;
+            border-radius: 20px;
+        }
+
+        /* 手機版自動適應 */
+        @media (max-width: 768px) {
+            .workspace {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cafe-card {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 class="main-title">喫茶レトロ - 三合一智慧理財計算機</h1>
+
+    <div class="workspace">
+
+        <div class="cafe-card">
+            
+            <div class="cafe-tabs">
+                <button type="button" class="tab-btn active" data-target="panel-compound">單筆複利</button>
+                <button type="button" class="tab-btn" data-target="panel-regular">定期定額</button>
+                <button type="button" class="tab-btn" data-target="panel-loan">貸款試算</button>
+            </div>
+
+            <div id="panel-compound" class="form-panel active">
+                <div class="form-group">
+                    <label for="comp_principal">單筆本金 (元)</label>
+                    <input type="text" class="input-field fin-input" id="comp_principal" value="100000" data-hint="單筆本金">
+                </div>
+                <div class="form-group">
+                    <label for="comp_rate">年利率 (%)</label>
+                    <input type="text" class="input-field fin-input" id="comp_rate" value="5" data-hint="複利年利率">
+                </div>
+                <div class="form-group">
+                    <label for="comp_years">存款年期 (年)</label>
+                    <input type="text" class="input-field fin-input" id="comp_years" value="10" data-hint="複利年期">
+                </div>
+                <div class="form-group">
+                    <label for="comp_freq">計息週期</label>
+                    <select class="input-field" id="comp_freq">
+                        <option value="1">按年複利 (每年計息 1 次)</option>
+                        <option value="12">按月複利 (每年計息 12 次)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="panel-regular" class="form-panel">
+                <div class="form-group">
+                    <label for="reg_amount">每期投入金額 (元)</label>
+                    <input type="text" class="input-field fin-input" id="reg_amount" value="5000" data-hint="每期投入金額">
+                </div>
+                <div class="form-group">
+                    <label for="reg_freq">投入頻率</label>
+                    <select class="input-field" id="reg_freq">
+                        <option value="12">每月投入一次</option>
+                        <option value="1">每年投入一次</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="reg_rate">預期年報酬率 (%)</label>
+                    <input type="text" class="input-field fin-input" id="reg_rate" value="6" data-hint="投資報酬率">
+                </div>
+                <div class="form-group">
+                    <label for="reg_years">投資年期 (年)</label>
+                    <input type="text" class="input-field fin-input" id="reg_years" value="10" data-hint="投資年期">
+                </div>
+            </div>
+
+            <div id="panel-loan" class="form-panel">
+                <div class="form-group">
+                    <label for="loan_amount">貸款總額 (元)</label>
+                    <input type="text" class="input-field fin-input" id="loan_amount" value="1000000" data-hint="貸款總額">
+                </div>
+                <div class="form-group">
+                    <label for="loan_rate">貸款年利率 (%)</label>
+                    <input type="text" class="input-field fin-input" id="loan_rate" value="2.1" data-hint="貸款年利率">
+                </div>
+                <div class="form-group">
+                    <label for="loan_years">貸款年限 (年)</label>
+                    <input type="text" class="input-field fin-input" id="loan_years" value="20" data-hint="貸款年限">
+                </div>
+            </div>
+
+            <div class="output-container-cafe">
+                <div class="output-row">
+                    <span id="label-res1">本利和總計：</span>
+                    <span><span id="val-res1" class="result-val">0</span> 元</span>
+                </div>
+                <div class="output-row">
+                    <span id="label-res2">賺取總利息：</span>
+                    <span><span id="val-res2" class="result-val">0</span> 元</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="cafe-card">
+            <div class="panel-header">
+                <h2>📟 數字快捷輸入鍵盤</h2>
+                <p>點擊左側任何輸入框，即可使用打字機鍵盤輸入</p>
+            </div>
+
+            <div class="calc-screen-hint">
+                目前正在輸入：<span id="currentFocusHint">單筆本金</span>
+            </div>
+
+            <div class="calc-grid">
+                <button class="calc-btn num" data-val="1">1</button>
+                <button class="calc-btn num" data-val="2">2</button>
+                <button class="calc-btn num" data-val="3">3</button>
+
+                <button class="calc-btn num" data-val="4">4</button>
+                <button class="calc-btn num" data-val="5">5</button>
+                <button class="calc-btn num" data-val="6">6</button>
+
+                <button class="calc-btn num" data-val="7">7</button>
+                <button class="calc-btn num" data-val="8">8</button>
+                <button class="calc-btn num" data-val="9">9</button>
+
+                <button class="calc-btn num" data-val=".">.</button>
+                <button class="calc-btn num" data-val="0">0</button>
+                <button class="calc-btn backspace" id="calcBack"><i class="fa-solid fa-backspace"></i></button>
+                
+                <button class="calc-btn clear" id="calcClear" style="grid-column: span 3; border-radius: 12px; height: 45px;">一鍵清空目前欄位 (AC)</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+        $(function () {
+
+            // 目前被聚焦的輸入框物件快取，預設為第一頁的第一個欄位
+            let $activeInput = $('#comp_principal');
+            let isFreshFocus = false;
+            let currentTab = "panel-compound";
+
+            // ==========================================
+            // 核心理財計算引擎 (支援三大功能)
+            // ==========================================
+            function dispatchCalculation() {
+                if (currentTab === "panel-compound") {
+                    calculateCompound();
+                } else if (currentTab === "panel-regular") {
+                    calculateRegularInvestment();
+                } else if (currentTab === "panel-loan") {
+                    calculateLoan();
+                }
+            }
+
+            // 1. 單筆複利計算邏輯
+            function calculateCompound() {
+                let p = Number($('#comp_principal').val());
+                let r = Number($('#comp_rate').val()) / 100;
+                let t = Number($('#comp_years').val());
+                let n = Number($('#comp_freq').val());
+
+                if ($('#comp_principal').val() === "" || $('#comp_rate').val() === "" || $('#comp_years').val() === "") {
+                    setEmptyResult();
+                    return;
+                }
+
+                let amount = p * Math.pow((1 + r / n), (n * t));
+                let interest = amount - p;
+
+                renderResult("本利和總計：", "賺取總利息：", amount, interest);
+            }
+
+            // 2. 定期定額計算邏輯 (年金終值)
+            function calculateRegularInvestment() {
+                let m = Number($('#reg_amount').val()); // 每期金額
+                let r = Number($('#reg_rate').val()) / 100; // 年報酬率
+                let t = Number($('#reg_years').val()); // 年期
+                let freq = Number($('#reg_freq').val()); // 一年幾次
+
+                if ($('#reg_amount').val() === "" || $('#reg_rate').val() === "" || $('#reg_years').val() === "") {
+                    setEmptyResult();
+                    return;
+                }
+
+                let periodRate = r / freq; // 每期利率
+                let totalPeriods = t * freq; // 總期數
+                let amount = 0;
+
+                if (periodRate === 0) {
+                    amount = m * totalPeriods;
+                } else {
+                    // 期末投入公式：Amount = M * [((1 + r)^n - 1) / r]
+                    amount = m * ((Math.pow(1 + periodRate, totalPeriods) - 1) / periodRate);
+                }
+                
+                let totalCost = m * totalPeriods; // 投入總本金
+                let earnings = amount - totalCost; // 淨賺利潤
+
+                renderResult("預估資產總值：", "累計淨賺利潤：", amount, earnings);
+            }
+
+            // 3. 貸款試算邏輯 (本息平均攤還法)
+            function calculateLoan() {
+                let p = Number($('#loan_amount').val()); // 貸款總額
+                let r = Number($('#loan_rate').val()) / 100; // 年利率
+                let t = Number($('#loan_years').val()); // 年期
+
+                if ($('#loan_amount').val() === "" || $('#loan_rate').val() === "" || $('#loan_years').val() === "") {
+                    setEmptyResult();
+                    return;
+                }
+
+                let monthlyRate = r / 12; // 月利率
+                let totalMonths = t * 12; // 總期數
+                let monthlyPayment = 0;
+
+                if (monthlyRate === 0) {
+                    monthlyPayment = p / totalMonths;
+                } else {
+                    // 本息平均攤還月付金公式：$$\text{月付金} = P \times \frac{r(1+r)^n}{(1+r)^n - 1}$$
+                    monthlyPayment = p * (monthlyRate * Math.pow(1 + monthlyRate, totalMonths)) / (Math.pow(1 + monthlyRate, totalMonths) - 1);
+                }
+
+                let totalRepayment = monthlyPayment * totalMonths; // 總還款額
+                let totalInterest = totalRepayment - p; // 總利息支出
+
+                renderResult("每月應付本息：", "總累計利息支出：", monthlyPayment, totalInterest);
+            }
+
+            // 輔助渲染函式
+            function renderResult(lbl1, lbl2, val1, val2) {
+                $('#label-res1').text(lbl1);
+                $('#label-res2').text(lbl2);
+                
+                if (isNaN(val1) || !isFinite(val1)) {
+                    $('#val-res1').text("計算錯誤");
+                    $('#val-res2').text("計算錯誤");
+                } else {
+                    $('#val-res1').text(Math.round(val1).toLocaleString());
+                    $('#val-res2').text(Math.round(val2).toLocaleString());
+                }
+            }
+
+            function setEmptyResult() {
+                $('#val-res1').text(" - ");
+                $('#val-res2').text(" - ");
+            }
+
+            // ==========================================
+            // 分頁切換整合 (Tabs)
+            // ==========================================
+            $('.tab-btn').on('click', function () {
+                $('.tab-btn').removeClass('active');
+                $(this).addClass('active');
+
+                currentTab = $(this).attr('data-target');
+                $('.form-panel').removeClass('active');
+                $('#' + currentTab).addClass('active');
+
+                // 切換分頁後，自動將右側鍵盤綁定到該分頁的第一個輸入框
+                let $firstInput = $('#' + currentTab).find('.input-field.fin-input').first();
+                if ($firstInput.length > 0) {
+                    $firstInput.focus();
+                }
+
+                dispatchCalculation();
+            });
+
+            // ==========================================
+            // 輸入框焦點追蹤優化 (自動全選文字)
+            // ==========================================
+            $('.workspace').on('focus click', '.fin-input', function () {
+                $activeInput = $(this);
+                $currentFocusHint.text($(this).attr('data-hint') || "當前欄位");
+                
+                if (document.activeElement === this) {
+                    this.select();
+                    isFreshFocus = true;
+                }
+            });
+
+            $('.workspace').on('input change', '.input-field', function () {
+                isFreshFocus = false;
+                dispatchCalculation();
+            });
+
+            // ==========================================
+            // 右側復古打字機快捷鍵盤輸入控制
+            // ==========================================
+            $('.calc-btn.num').on('click', function () {
+                let val = $(this).attr('data-val');
+                let currentVal = $activeInput.val();
+
+                // 如果是新聚焦狀態，按字鍵直接全選覆蓋
+                if (isFreshFocus) {
+                    currentVal = "";
+                    isFreshFocus = false;
+                }
+
+                // 防呆：如果是本金或年期類別的 ID（不包含 rate 利率），阻擋輸入小數點
+                let currentId = $activeInput.attr('id') || "";
+                if (val === "." && !currentId.includes("rate")) {
+                    return;
+                }
+
+                // 防呆：利率欄位也只能有一個小數點
+                if (val === "." && currentVal.includes(".")) {
+                    return;
+                }
+
+                $activeInput.val(currentVal + val);
+                dispatchCalculation();
+            });
+
+            // 退格鍵
+            $('#calcBack').on('click', function () {
+                let currentVal = $activeInput.val();
+                if (isFreshFocus) {
+                    $activeInput.val("");
+                    isFreshFocus = false;
+                } else {
+                    $activeInput.val(currentVal.substring(0, currentVal.length - 1));
+                }
+                dispatchCalculation();
+            });
+
+            // AC 清空
+            $('#calcClear').on('click', function () {
+                $activeInput.val("");
+                isFreshFocus = false;
+                dispatchCalculation();
+            });
+
+            // 初始化時第一次計算
+            dispatchCalculation();
+        });
+    </script>
+
+</body>
+
+</html>

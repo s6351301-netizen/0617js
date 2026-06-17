@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日系喫茶店 - JQ智慧複利計算機</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* ==========================================
+           全域基本重設 & 輕復古喫茶店背景
+           ========================================== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background-color: #f4f0ea; /* 溫潤燕麥奶色 */
+            background-image: 
+                radial-gradient(#e6ded4 1px, transparent 1px), 
+                radial-gradient(#e6ded4 1px, #f4f0ea 1px);
+            background-size: 24px 24px;
+            background-position: 0 0, 12px 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: "PingFang TC", "Helvetica Neue", "Microsoft JhengHei", sans-serif;
+            padding: 30px 20px;
+            color: #4a3e3d;
+        }
+
+        h1.main-title {
+            color: #2b4c3f; /* 沉穩抹茶綠 */
+            margin-bottom: 35px;
+            font-size: 26px;
+            letter-spacing: 2px;
+            text-align: center;
+            font-weight: 600;
+            position: relative;
+        }
+
+        h1.main-title::after {
+            content: "";
+            display: block;
+            width: 50px;
+            height: 3px;
+            background-color: #c08457; /* 焦糖色 */
+            margin: 8px auto 0;
+            border-radius: 2px;
+        }
+
+        /* 主工作區佈局 */
+        .workspace {
+            display: flex;
+            gap: 35px;
+            max-width: 1000px;
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        /* 喫茶店風格卡片基礎樣式 */
+        .cafe-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 12px 30px rgba(74, 62, 61, 0.06), 0 2px 6px rgba(74, 62, 61, 0.04);
+            padding: 30px;
+            flex: 1;
+            min-width: 340px;
+            max-width: 450px;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .cafe-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .cafe-card::after {
+            content: "Café Wealth";
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #c6b9ad;
+        }
+
+        /* 卡片頂部標頭 */
+        .panel-header {
+            text-align: center;
+            margin-bottom: 24px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #e6ded4;
+        }
+
+        .panel-header h2 {
+            color: #2b4c3f;
+            font-size: 19px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .panel-header p {
+            font-size: 12px;
+            color: #8a7a75;
+        }
+
+        /* 表單標籤文字 */
+        .form-group {
+            margin-bottom: 14px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #2b4c3f;
+            margin-bottom: 4px;
+            padding-left: 4px;
+        }
+
+        /* 輸入框與下拉選單樣式 */
+        .input-field {
+            width: 100%;
+            height: 45px;
+            border: 1px solid #dcd3c9;
+            border-radius: 8px;
+            padding: 0 15px;
+            font-size: 15px;
+            outline: none;
+            background: #faf8f5;
+            text-align: center;
+            color: #4a3e3d;
+            transition: all 0.25s ease;
+        }
+
+        .input-field:focus {
+            border-color: #2b4c3f;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(43, 76, 63, 0.08);
+        }
+
+        select.input-field {
+            text-align-last: center;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* 輸出區塊：深綠色優雅黑板感 */
+        .output-container-cafe {
+            margin-top: 20px;
+            background: #2b4c3f;
+            color: #f4f0ea;
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.15);
+        }
+
+        .output-container-cafe div span {
+            color: #f7ca75; /* 亮眼琥珀金顯示數據 */
+            font-weight: 600;
+            font-size: 1.15rem;
+        }
+
+        /* --- 右面板：數字快捷鍵盤界面 --- */
+        .calc-screen-hint {
+            width: 100%;
+            background: #faf8f5;
+            border: 1px solid #dcd3c9;
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            color: #8a7a75;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .calc-screen-hint span {
+            color: #c08457;
+            font-weight: 600;
+        }
+
+        /* 計算機按鍵網格（3x4 結構更適合單純數字輸入） */
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        /* 打字機圓潤鍵帽外觀 */
+        .calc-btn {
+            height: 54px;
+            border: 1px solid #e6ded4;
+            border-radius: 50%;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            background: #ffffff;
+            color: #4a3e3d;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.03);
+            transition: all 0.15s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .calc-btn:hover {
+            background: #faf8f5;
+            border-color: #c08457;
+            color: #c08457;
+        }
+
+        .calc-btn:active {
+            transform: scale(0.95);
+            box-shadow: none;
+        }
+
+        .calc-btn.clear {
+            background: #fdf2f2;
+            color: #c56b6b;
+            border-color: #f7dddd;
+            border-radius: 20px;
+        }
+
+        .calc-btn.clear:hover {
+            background: #fbe6e6;
+            color: #b34e4e;
+        }
+
+        /* 手機版自動適應 */
+        @media (max-width: 768px) {
+            .workspace {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cafe-card {
+                max-width: 100%;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1 class="main-title">喫茶レトロ - JQ 智慧複利計算機</h1>
+
+    <div class="workspace">
+
+        <div class="cafe-card">
+            <div class="panel-header">
+                <h2>☕ 複利資產即時特調</h2>
+                <p>更動下方任何欄位 · 即可自動精算複利終值</p>
+            </div>
+
+            <div>
+                <div class="form-group">
+                    <label for="principal">存款本金 (元)</label>
+                    <input type="text" class="input-field" id="principal" value="100000" placeholder="例如: 100000">
+                </div>
+                
+                <div class="form-group">
+                    <label for="interestRate">年利率 (%)</label>
+                    <input type="text" class="input-field" id="interestRate" value="5" placeholder="例如: 5">
+                </div>
+
+                <div class="form-group">
+                    <label for="years">存款年期 (年)</label>
+                    <input type="text" class="input-field" id="years" value="10" placeholder="例如: 10">
+                </div>
+
+                <div class="form-group">
+                    <label for="frequency">計息週期</label>
+                    <select class="input-field" id="frequency">
+                        <option value="1">按年複利 (每年計息1次)</option>
+                        <option value="12">按月複利 (每年計息12次)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="output-container-cafe">
+                <div id="totalWealth">本利和總計：<span id="spanTotal">0</span> 元</div>
+                <div id="totalInterest">賺取總利息：<span id="spanInterest">0</span> 元</div>
+            </div>
+        </div>
+
+        <div class="cafe-card">
+            <div class="panel-header">
+                <h2>📟 數字快捷輸入鍵盤</h2>
+                <p>點擊上方任一輸入框後，可用此鍵盤快速鍵入</p>
+            </div>
+
+            <div class="calc-screen-hint">
+                目前正在輸入：<span id="currentFocusHint">存款本金</span>
+            </div>
+
+            <div class="calc-grid">
+                <button class="calc-btn num" data-val="1">1</button>
+                <button class="calc-btn num" data-val="2">2</button>
+                <button class="calc-btn num" data-val="3">3</button>
+
+                <button class="calc-btn num" data-val="4">4</button>
+                <button class="calc-btn num" data-val="5">5</button>
+                <button class="calc-btn num" data-val="6">6</button>
+
+                <button class="calc-btn num" data-val="7">7</button>
+                <button class="calc-btn num" data-val="8">8</button>
+                <button class="calc-btn num" data-val="9">9</button>
+
+                <button class="calc-btn num" data-val=".">.</button>
+                <button class="calc-btn num" data-val="0">0</button>
+                <button class="calc-btn clear" id="calcClear">AC</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+        $(function () {
+
+            // ==========================================
+            // 宣告常用 jQuery 物件快取
+            // ==========================================
+            const $principal = $('#principal');
+            const $interestRate = $('#interestRate');
+            const $years = $('#years');
+            const $frequency = $('#frequency');
+            
+            const $spanTotal = $('#spanTotal');
+            const $spanInterest = $('#spanInterest');
+            const $currentFocusHint = $('#currentFocusHint');
+
+            // 紀錄目前使用者點擊、聚焦在哪一個輸入框，預設為本金輸入框
+            let $activeInput = $principal;
+
+            // ==========================================
+            // 焦點追蹤：知道使用者目前想用鍵盤輸入哪一個欄位
+            // ==========================================
+            $principal.on('focus', function() {
+                $activeInput = $(this);
+                $currentFocusHint.text("存款本金");
+            });
+
+            $interestRate.on('focus', function() {
+                $activeInput = $(this);
+                $currentFocusHint.text("年利率");
+            });
+
+            $years.on('focus', function() {
+                $activeInput = $(this);
+                $currentFocusHint.text("存款年期");
+            });
+
+            // ==========================================
+            // 核心複利計算邏輯
+            // ==========================================
+            function calculateCompoundInterest() {
+                let p = Number($principal.val());       // 本金
+                let r = Number($interestRate.val()) / 100; // 年利率轉小數
+                let t = Number($years.val());           // 年期
+                let n = Number($frequency.val());       // 一年計息幾次
+
+                // 防呆機制：若欄位為空或不是數字，不執行計算
+                if ($principal.val() === "" || $interestRate.val() === "" || $years.val() === "") {
+                    $spanTotal.text(" - ");
+                    $spanInterest.text(" - ");
+                    return;
+                }
+
+                // 複利公式：$$Amount = P \times (1 + r/n)^{n \times t}$$
+                let amount = p * Math.pow((1 + r / n), (n * t));
+                let interest = amount - p;
+
+                // 四捨五入至整數，並加上千分位逗號優化美觀度
+                $spanTotal.text(Math.round(amount).toLocaleString());
+                $spanInterest.text(Math.round(interest).toLocaleString());
+            }
+
+            // 監聽左側所有表單欄位更動（智慧即時觸發）
+            $('#principal, #interestRate, #years, #frequency').on('input change', function() {
+                calculateCompoundInterest();
+            });
+
+            // ==========================================
+            // 右側復古鍵盤輸入事件處理 (純 JQ 語法)
+            // ==========================================
+            $('.calc-btn.num').on('click', function() {
+                let val = $(this).attr('data-val');
+                let currentVal = $activeInput.val();
+
+                // 避免重複輸入多個小數點
+                if (val === "." && currentVal.includes(".")) {
+                    return;
+                }
+
+                $activeInput.val(currentVal + val);
+                calculateCompoundInterest(); // 輸入後立即動態精算
+            });
+
+            // 鍵盤 AC 清除鍵：只清除目前聚焦選中的那個輸入框
+            $('#calcClear').on('click', function() {
+                $activeInput.val("");
+                calculateCompoundInterest();
+            });
+
+            // 網頁初始載入時先執行一次計算
+            calculateCompoundInterest();
+        });
+    </script>
+
+</body>
+
+</html>
